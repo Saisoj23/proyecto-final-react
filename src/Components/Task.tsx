@@ -1,4 +1,4 @@
-import { COLORS } from "../Constants/constants";
+import { COLORS } from "../ContextVariables/constants";
 import { ButtonGroup } from "./ButtonGroup";
 
 const Task = (props: { content: string; column: number }) => {

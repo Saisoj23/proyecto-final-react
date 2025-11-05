@@ -17,19 +17,41 @@ import {
 } from "./ContextVariables/GroupButtonsContext";
 import type { GroupButtonsType } from "./ContextVariables/GroupButtonsContext";
 
+import EnabledUIContext from "./ContextVariables/EnabledUIContext";
+import type { ConfirmationTargetInfo } from "./ContextVariables/ConfirmationTargetInfo";
+
 function App() {
-  const [Board, setBoard] = useState(useContext(BoardContext) as BoardType);
+  const [board, setBoard] = useState(useContext(BoardContext) as BoardType);
 
   const [columnCount, setColumnCount] = useState(
-    Object.keys(Board.cols).length
+    Object.keys(board.cols).length
   );
+
+  const [confirmationContent, setConfirmationContent] = useState(
+    {} as ConfirmationTargetInfo
+  );
+  const [enabledUI, setEnabledUI] = useState(true);
+
+  const updateEnableUIValue = (newValue: boolean) => {
+    setEnabledUI(newValue);
+  };
+
+  let EditTaskContentCallback = (task: string | number) => {
+    setConfirmationContent({
+      content: "Modify task",
+      target: task as string,
+      rename: true,
+      confirmCallback: EditTaskContent,
+    } as ConfirmationTargetInfo);
+    setEnabledUI(false);
+  };
 
   let EditTaskContent = (task: string | number, newContent: string) => {
     if (task === newContent) return;
 
-    if (Object.keys(Board.tasks).includes(newContent)) {
+    if (Object.keys(board.tasks).includes(newContent)) {
       let index = 1;
-      while (Object.keys(Board.tasks).includes(newContent + `${index}`)) {
+      while (Object.keys(board.tasks).includes(newContent + `${index}`)) {
         index++;
         console.log(newContent + `${index}`);
       }
@@ -37,11 +59,11 @@ function App() {
     }
 
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    for (const key in Board.tasks) {
-      newBoard.tasks[key] = Board.tasks[key];
+    newBoard.cols = board.cols;
+    for (const key in board.tasks) {
+      newBoard.tasks[key] = board.tasks[key];
       if (key === task) {
-        newBoard.tasks[newContent] = Board.tasks[key];
+        newBoard.tasks[newContent] = board.tasks[key];
       }
     }
     delete newBoard.tasks[task];
@@ -51,8 +73,8 @@ function App() {
 
   let DeleteTask = (content: string | number) => {
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    newBoard.tasks = Board.tasks;
+    newBoard.cols = board.cols;
+    newBoard.tasks = board.tasks;
 
     delete newBoard.tasks[content];
 
@@ -63,10 +85,10 @@ function App() {
     if (columnCount === 1) return;
 
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    newBoard.tasks = Board.tasks;
+    newBoard.cols = board.cols;
+    newBoard.tasks = board.tasks;
 
-    let target = Board.tasks[content];
+    let target = board.tasks[content];
     if (backward) {
       target--;
       if (target < 0) target = columnCount - 1;
@@ -81,12 +103,23 @@ function App() {
     setBoard(newBoard);
   };
 
-  let EditColumnName = (column: number | string, newName: string) => {
-    if (Board.cols[column as number] === newName) return;
+  let EditColumnNameCallback = (column: number | string) => {
+    setConfirmationContent({
+      content: "Change column name",
+      target: column as number,
+      rename: true,
+      column: board.cols[column as number],
+      confirmCallback: EditColumnName,
+    } as ConfirmationTargetInfo);
+    setEnabledUI(false);
+  };
 
-    if (Object.values(Board.cols).includes(newName)) {
+  let EditColumnName = (column: number | string, newName: string) => {
+    if (board.cols[column as number] === newName) return;
+
+    if (Object.values(board.cols).includes(newName)) {
       let index = 1;
-      while (Object.values(Board.cols).includes(newName + `${index}`)) {
+      while (Object.values(board.cols).includes(newName + `${index}`)) {
         index++;
         console.log(newName + `${index}`);
       }
@@ -94,11 +127,23 @@ function App() {
     }
 
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    newBoard.tasks = Board.tasks;
+    newBoard.cols = board.cols;
+    newBoard.tasks = board.tasks;
     newBoard.cols[column as number] = newName;
 
     setBoard(newBoard);
+  };
+
+  let DeleteColumnCallback = (column: number | string) => {
+    setConfirmationContent({
+      content: `Are you sure you want to delete the column ${
+        board.cols[column as number]
+      }?`,
+      target: column as number,
+      rename: false,
+      confirmCallback: DeleteColumn,
+    } as ConfirmationTargetInfo);
+    setEnabledUI(false);
   };
 
   let DeleteColumn = (column: number | string) => {
@@ -108,19 +153,19 @@ function App() {
     }
 
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    newBoard.tasks = Board.tasks;
+    newBoard.cols = board.cols;
+    newBoard.tasks = board.tasks;
 
-    for (const key in Board.cols) {
+    for (const key in board.cols) {
       const index = parseInt(key);
       if (index >= (column as number) && index < columnCount - 1) {
         newBoard.cols[index] = newBoard.cols[index + 1];
       }
     }
 
-    delete newBoard.cols[Object.keys(Board.cols).length - 1];
+    delete newBoard.cols[Object.keys(board.cols).length - 1];
 
-    for (const key in Board.tasks) {
+    for (const key in board.tasks) {
       if (newBoard.tasks[key] === (column as number)) {
         delete newBoard.tasks[key];
       } else if (newBoard.tasks[key] >= (column as number)) {
@@ -129,15 +174,15 @@ function App() {
     }
 
     setBoard(newBoard);
-    setColumnCount(Object.keys(Board.cols).length);
+    setColumnCount(Object.keys(board.cols).length);
   };
 
   let MoveColumn = (column: number | string, backward: boolean = false) => {
     if (columnCount === 1) return;
 
     let newBoard: BoardType = { cols: {}, tasks: {} };
-    newBoard.cols = Board.cols;
-    newBoard.tasks = Board.tasks;
+    newBoard.cols = board.cols;
+    newBoard.tasks = board.tasks;
 
     let target = column as number;
     if (backward) {
@@ -156,9 +201,9 @@ function App() {
       }
     }
 
-    [Board.cols[column as number], Board.cols[target]] = [
-      Board.cols[target],
-      Board.cols[column as number],
+    [board.cols[column as number], board.cols[target]] = [
+      board.cols[target],
+      board.cols[column as number],
     ];
 
     setBoard(newBoard);
@@ -167,14 +212,14 @@ function App() {
   const groupButtonsColumnContextValue = useContext(
     GroupButtonsColumnContext
   ) as GroupButtonsType;
-  groupButtonsColumnContextValue.editName = EditColumnName;
-  groupButtonsColumnContextValue.delete = DeleteColumn;
+  groupButtonsColumnContextValue.editName = EditColumnNameCallback;
+  groupButtonsColumnContextValue.delete = DeleteColumnCallback;
   groupButtonsColumnContextValue.move = MoveColumn;
 
   const groupButtonsTaskContextValue = useContext(
     GroupButtonsTaskContext
   ) as GroupButtonsType;
-  groupButtonsTaskContextValue.editName = EditTaskContent;
+  groupButtonsTaskContextValue.editName = EditTaskContentCallback;
   groupButtonsTaskContextValue.delete = DeleteTask;
   groupButtonsTaskContextValue.move = MoveTask;
 
@@ -182,9 +227,9 @@ function App() {
     event.preventDefault();
     let newContent = event.currentTarget["add-task"].value;
 
-    if (Object.keys(Board.tasks).includes(newContent)) {
+    if (Object.keys(board.tasks).includes(newContent)) {
       let index = 1;
-      while (Object.keys(Board.tasks).includes(newContent + `${index}`)) {
+      while (Object.keys(board.tasks).includes(newContent + `${index}`)) {
         index++;
         console.log(newContent + `${index}`);
       }
@@ -203,9 +248,9 @@ function App() {
 
   let AddColumn = (event: React.MouseEvent<HTMLButtonElement>) => {
     let colName = `Column ${columnCount + 1}`;
-    if (Object.values(Board.cols).includes(colName)) {
+    if (Object.values(board.cols).includes(colName)) {
       let index = 1;
-      while (Object.values(Board.cols).includes(`Column ${index}`)) {
+      while (Object.values(board.cols).includes(`Column ${index}`)) {
         index++;
       }
       colName = `Column ${index}`;
@@ -219,36 +264,38 @@ function App() {
       },
     }));
 
-    setColumnCount(Object.keys(Board.cols).length + 1);
+    setColumnCount(Object.keys(board.cols).length + 1);
   };
 
   return (
     <>
-      <ConfirmationWindow
-        hidden={true}
-        content="¿Seguro que desea eliminar la columna?"
-      />
-      <Header />
-      <TaskInput addTask={AddTask} />
-
-      <main
-        id="main-board"
-        className="flex justify-center items-start flex-wrap gap-4 m-4"
+      <EnabledUIContext.Provider
+        value={{ value: enabledUI, updateValue: updateEnableUIValue }}
       >
-        {Object.keys(Board.cols)
-          .map(Number)
-          .map((column) => (
-            <Column column={column} name={Board.cols[column]}>
-              {Object.keys(Board.tasks).map((taskContent) => {
-                if (Board.tasks[taskContent] === column) {
-                  return <Task content={taskContent} column={column} />;
-                }
-                return null;
-              })}
-            </Column>
-          ))}
-        <AddColumnButton hidden={columnCount >= 6} addColumn={AddColumn} />
-      </main>
+        <ConfirmationWindow hidden={enabledUI} content={confirmationContent} />
+
+        <Header />
+        <TaskInput addTask={AddTask} />
+
+        <main
+          id="main-board"
+          className="flex justify-center items-start flex-wrap gap-4 m-4"
+        >
+          {Object.keys(board.cols)
+            .map(Number)
+            .map((column) => (
+              <Column column={column} name={board.cols[column]}>
+                {Object.keys(board.tasks).map((taskContent) => {
+                  if (board.tasks[taskContent] === column) {
+                    return <Task content={taskContent} column={column} />;
+                  }
+                  return null;
+                })}
+              </Column>
+            ))}
+          <AddColumnButton hidden={columnCount >= 6} addColumn={AddColumn} />
+        </main>
+      </EnabledUIContext.Provider>
 
       <ColorLoader />
     </>

@@ -1,3 +1,6 @@
+import { useContext, useState } from "react";
+import EnabledUIContext from "../ContextVariables/EnabledUIContext";
+
 import leftArrowIcon from "../assets/arrow-left-3-svgrepo-com.svg";
 import rightArrowIcon from "../assets/arrow-right-2-svgrepo-com.svg";
 import editIcon from "../assets/edit-2-svgrepo-com.svg";
@@ -8,13 +11,15 @@ import {
   GroupButtonsTaskContext,
 } from "../ContextVariables/GroupButtonsContext";
 import type { GroupButtonsType } from "../ContextVariables/GroupButtonsContext";
-import { useContext } from "react";
 
 export const ButtonGroup = (props: {
   column?: number;
   task?: string;
   large?: boolean;
 }) => {
+  const { value: enabledUI, updateValue: setEnabledUI } =
+    useContext(EnabledUIContext);
+
   const { column = 0, task = "", large = false } = props;
 
   let groupButtonMethods;
@@ -31,6 +36,7 @@ export const ButtonGroup = (props: {
   return (
     <div className="button-map-group absolute z-11 hover:z-19 w-full h-full right-0 top-0 opacity-0 hover:opacity-100 transition-opacity duration-100">
       <button
+        disabled={!enabledUI}
         onClick={() => {
           large
             ? groupButtonMethods.move(column, true)
@@ -43,6 +49,7 @@ export const ButtonGroup = (props: {
         <img src={leftArrowIcon} alt="Left Arrow" className="w-full h-full" />
       </button>
       <button
+        disabled={!enabledUI}
         onClick={() => {
           large
             ? groupButtonMethods.move(column, false)
@@ -55,6 +62,7 @@ export const ButtonGroup = (props: {
         <img src={rightArrowIcon} alt="Right Arrow" className="w-full h-full" />
       </button>
       <button
+        disabled={!enabledUI}
         onClick={() => {
           large
             ? groupButtonMethods.editName(column, "newName")
@@ -67,6 +75,7 @@ export const ButtonGroup = (props: {
         <img src={editIcon} alt="Edit Icon" className="w-7/10 h-7/10" />
       </button>
       <button
+        disabled={!enabledUI}
         onClick={() => {
           large
             ? groupButtonMethods.delete(column)

@@ -1,4 +1,4 @@
-import { COLORS } from "../Constants/constants";
+import { COLORS } from "../ContextVariables/constants";
 import { ButtonGroup } from "./ButtonGroup";
 
 const Column = (props: {
@@ -15,7 +15,7 @@ const Column = (props: {
       <div
         className={`column-header relative bg-${COLORS[column]}-400 w-full rounded-lg`}
       >
-        <h2 className="column-title text-center font-bold text-xl p-2">
+        <h2 className="column-title text-center font-bold text-xl p-2 break-words overflow-hidden">
           {name}
         </h2>
         <ButtonGroup large={true} column={column} />

@@ -1,7 +1,13 @@
+import { useContext } from "react";
+import EnabledUIContext from "../ContextVariables/EnabledUIContext";
+
 const TaskInput = (props: {
   addTask: (event: React.FormEvent<HTMLFormElement>) => void;
 }) => {
   const { addTask } = props;
+
+  const { value: enabledUI, updateValue: setEnabledUI } =
+    useContext(EnabledUIContext);
 
   return (
     <form
@@ -17,6 +23,7 @@ const TaskInput = (props: {
       </label>
       <div className="relative flex flex-row">
         <input
+          disabled={!enabledUI}
           type="text"
           name="add-task"
           id="add-task-input"
@@ -26,6 +33,7 @@ const TaskInput = (props: {
           maxLength={300}
         />
         <button
+          disabled={!enabledUI}
           type="submit"
           className="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
