@@ -53,8 +53,8 @@ export const ConfirmationWindow = (props: {
               className="block w-100 p-4 text-sm text-slate-900 border border-slate-300 rounded-lg bg-slate-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder={
                 typeof content.target === "number"
-                  ? "New column name..."
-                  : "New task content"
+                  ? "New name..."
+                  : "New content..."
               }
             />
           ) : (
